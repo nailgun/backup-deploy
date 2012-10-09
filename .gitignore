@@ -1,4 +1,4 @@
 .*.swp
 /run.sh
-/.my.cnf
-/.passphrase
+/my.cnf
+/passphrase
