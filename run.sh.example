@@ -16,7 +16,7 @@ function cleanup() {
 trap cleanup EXIT
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-scp $SSH_HOST:/backup/.passphrase $HERE || true
+scp $SSH_HOST:/backup/.passphrase $HERE/passphrase || true
 export PASSPHRASE="$(cat $HERE/passphrase)"
 
 mkdir -p /backup/.temp/sql
