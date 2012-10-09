@@ -7,6 +7,14 @@ echo '--------------[  Backup started  ]---------------'
 umask 077
 set -e
 
+function cleanup() {
+    if [ -e /backup/.temp ]; then
+        rm -rf /backup/.temp
+    fi
+}
+
+trap cleanup EXIT
+
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 scp $SSH_HOST:/backup/passphrase $HERE || true
 export PASSPHRASE="$(cat $HERE/passphrase)"
