@@ -38,23 +38,26 @@ if [ ! -e $HERE/run.sh ]; then
     chmod +x $HERE/run.sh
 fi
 
-if which mysql &> /dev/null; then
-    umask 077
+function install_mysql_user() {
+    if which mysql &> /dev/null; then
+        umask 077
 
-    echo '-----[ Creating mysql user ...'
-    echo 'Enter mysql root password now'
-    MYSQL_PWD=$(mkpw)
+        echo '-----[ Creating mysql user ...'
+        echo 'Enter mysql root password now'
+        MYSQL_PWD=$(mkpw)
 
-    mysql -u root -p << EOF
+        mysql -u root -p << EOF
 GRANT SELECT ON *.* TO backup@localhost IDENTIFIED BY "$MYSQL_PWD";
 GRANT LOCK TABLES ON *.* TO backup@localhost IDENTIFIED BY "$MYSQL_PWD";
 GRANT RELOAD ON *.* TO backup@localhost IDENTIFIED BY "$MYSQL_PWD";
 EOF
 
-    cat > $HERE/my.cnf << EOF
+        cat > $HERE/my.cnf << EOF
 [client]
 user=backup
 password=$MYSQL_PWD
 EOF
+    fi
+}
 
-fi
+( install_mysql_user ) || true
