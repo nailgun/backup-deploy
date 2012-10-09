@@ -51,7 +51,7 @@ GRANT LOCK TABLES ON *.* TO backup@localhost IDENTIFIED BY "$MYSQL_PWD";
 GRANT RELOAD ON *.* TO backup@localhost IDENTIFIED BY "$MYSQL_PWD";
 EOF
 
-    cat > $HERE/.my.cnf << EOF
+    cat > $HERE/my.cnf << EOF
 [client]
 user=backup
 password=$MYSQL_PWD

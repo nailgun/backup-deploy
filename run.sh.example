@@ -8,11 +8,11 @@ umask 077
 set -e
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-scp $SSH_HOST:/backup/.passphrase $HERE || true
-export PASSPHRASE="$(cat $HERE/.passphrase)"
+scp $SSH_HOST:/backup/passphrase $HERE || true
+export PASSPHRASE="$(cat $HERE/passphrase)"
 
 mkdir -p /backup/.temp/sql
-mysqldump --defaults-file=$HERE/.my.cnf --all-databases > /backup/.temp/sql/mysql.sql
+mysqldump --defaults-file=$HERE/my.cnf --all-databases > /backup/.temp/sql/mysql.sql
 sqlite3 /somedb.db .dump > /backup/.temp/sql/seorank.sql
 duplicity --full-if-older-than 1W /backup/.temp/sql file:///backup/sql
 rm -rf /backup/.temp
