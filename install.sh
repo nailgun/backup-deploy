@@ -32,6 +32,12 @@ echo '-----[ Installing SSH key to backup host ...'
 scp ~/.ssh/id_rsa.pub $SSH_HOST:/tmp/new_key
 ssh -t $SSH_HOST /backup/install_key.sh $myhost /tmp/new_key
 
+if [ ! -e $HERE/run.sh ]; then
+    echo '-----[ Generating run.sh example ...'
+    sed -e "s/LOCALHOST/$myhost/g" $HERE/run.sh.example > $HERE/run.sh
+    chmod +x $HERE/run.sh
+fi
+
 if which mysql &> /dev/null; then
     umask 077
 
