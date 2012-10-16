@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SSH_HOST=LOCALHOST@backup.nailgun.name
+BACKUP_DIR=/backup
 
 echo '--------------[  Backup started  ]---------------'
 
@@ -8,23 +9,36 @@ umask 077
 set -e
 
 function cleanup() {
-    if [ -e /backup/.temp ]; then
-        rm -rf /backup/.temp
+    if [ -e $BACKUP_DIR/.temp ]; then
+        rm -rf $BACKUP_DIR/.temp
     fi
 }
 
 trap cleanup EXIT
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-scp $SSH_HOST:/backup/.passphrase $HERE/passphrase || true
 export PASSPHRASE="$(cat $HERE/passphrase)"
 
-mkdir -p /backup/.temp/sql
-mysqldump --defaults-file=$HERE/my.cnf --all-databases > /backup/.temp/sql/mysql.sql
-sqlite3 /somedb.db .dump > /backup/.temp/sql/seorank.sql
-duplicity --full-if-older-than 1W /backup/.temp/sql file:///backup/sql
-rm -rf /backup/.temp
-duplicity remove-older-than 1M file:///backup/sql
+(
+    echo -e '\n-----[ sql ...'
 
-echo 'Running rsync ...'
-rsync -avz --delete /backup $SSH_HOST:~
+    mkdir -p $BACKUP_DIR/.temp/sql
+    mysqldump --defaults-file=$HERE/my.cnf --all-databases > $BACKUP_DIR/.temp/sql/mysql.sql
+    sqlite3 /somedb.db .dump > $BACKUP_DIR/.temp/sql/seorank.sql
+
+    duplicity --full-if-older-than 1W $BACKUP_DIR/.temp/sql file://$BACKUP_DIR/sql
+    duplicity remove-older-than 1M file://$BACKUP_DIR/sql
+
+    rm -rf $BACKUP_DIR/.temp/sql
+) || true
+
+(
+    echo -e '\n-----[ files ...'
+    duplicity --full-if-older-than 1W /files "file://$BACKUP_DIR/local/files"
+    duplicity remove-older-than 1M "file://$BACKUP_DIR/local/files"
+) || true
+
+echo -e '\n-----[ rsync ...'
+rsync -avz --delete $BACKUP_DIR $SSH_HOST:~
+
+cleanup
