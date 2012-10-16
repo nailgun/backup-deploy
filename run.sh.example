@@ -9,9 +9,7 @@ umask 077
 set -e
 
 function cleanup() {
-    if [ -e $BACKUP_DIR/.temp ]; then
-        rm -rf $BACKUP_DIR/.temp
-    fi
+    rm -rf $BACKUP_DIR/.temp
 }
 
 trap cleanup EXIT
@@ -24,7 +22,7 @@ export PASSPHRASE="$(cat $HERE/passphrase)"
 
     mkdir -p $BACKUP_DIR/.temp/sql
     mysqldump --defaults-file=$HERE/my.cnf --all-databases > $BACKUP_DIR/.temp/sql/mysql.sql
-    sqlite3 /somedb.db .dump > $BACKUP_DIR/.temp/sql/seorank.sql
+    sqlite3 /somedb.db .dump > $BACKUP_DIR/.temp/sql/somedb.sql
 
     duplicity --full-if-older-than 1W $BACKUP_DIR/.temp/sql file://$BACKUP_DIR/sql
     duplicity remove-older-than 1M file://$BACKUP_DIR/sql
@@ -34,11 +32,11 @@ export PASSPHRASE="$(cat $HERE/passphrase)"
 
 (
     echo -e '\n-----[ files ...'
-    duplicity --full-if-older-than 1W /files "file://$BACKUP_DIR/local/files"
-    duplicity remove-older-than 1M "file://$BACKUP_DIR/local/files"
+    duplicity --full-if-older-than 1W /files "file://$BACKUP_DIR/files"
+    duplicity remove-older-than 1M "file://$BACKUP_DIR/files"
 ) || true
+
+cleanup
 
 echo -e '\n-----[ rsync ...'
 rsync -avz --delete $BACKUP_DIR $SSH_HOST:~
-
-cleanup
