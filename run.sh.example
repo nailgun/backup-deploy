@@ -39,4 +39,4 @@ export PASSPHRASE="$(cat $HERE/passphrase)"
 cleanup
 
 echo -e '\n-----[ rsync ...'
-rsync -rltD --delete $BACKUP_DIR $SSH_HOST:~
+rsync -rltDvz --delete $BACKUP_DIR $SSH_HOST:~
