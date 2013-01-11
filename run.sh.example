@@ -25,7 +25,7 @@ export PASSPHRASE="$(cat $HERE/passphrase)"
     sqlite3 /somedb.db .dump > $BACKUP_DIR/.temp/sql/somedb.sql
 
     duplicity --full-if-older-than 1W $BACKUP_DIR/.temp/sql file://$BACKUP_DIR/sql
-    duplicity remove-older-than 1M file://$BACKUP_DIR/sql
+    duplicity --force remove-older-than 1M file://$BACKUP_DIR/sql
 
     rm -rf $BACKUP_DIR/.temp/sql
 ) || true
@@ -33,7 +33,7 @@ export PASSPHRASE="$(cat $HERE/passphrase)"
 (
     echo -e '\n-----[ files ...'
     duplicity --full-if-older-than 1W /files "file://$BACKUP_DIR/files"
-    duplicity remove-older-than 1M "file://$BACKUP_DIR/files"
+    duplicity --force remove-older-than 1M "file://$BACKUP_DIR/files"
 ) || true
 
 cleanup
